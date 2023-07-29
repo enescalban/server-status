@@ -17,35 +17,21 @@ txt_file = input(simple_colors.green("Lütfen txt dosyasının adını (örn. do
 
 # Tüm domainleri okuyup kontrol etmek için bir fonksiyon tanımlayalım
 def check_domains(url_list):
-    status_code_files = {}
     for url in url_list:
         url = url.strip()  # Boşlukları kaldırma
         try:
             res = requests.get(url, verify=False)
             status_code = res.status_code
-            if status_code == 200:
-                status_color = simple_colors.green
-                status_file = '200.txt'
-            elif status_code == 403:
+            if status_code == 403 or status_code == 401:
                 status_color = simple_colors.red
-                status_file = '403.txt'
-            elif status_code == 401:
-                status_color = simple_colors.red
-                status_file = '401.txt'
+                status = "Kapalı"
             else:
-                status_color = simple_colors.yellow
-                status_file = 'other_status.txt'
+                status_color = simple_colors.green
+                status = "Açık"
             
-            status_code_files.setdefault(status_code, []).append(url)
-            print(f"{url} = {status_color(status_code)}")
-        except Exception as e:
-            print(f"{url} = {simple_colors.red('Hata:')} {e}")
-    
-    # Belirli HTTP durum kodlarına sahip domainleri ilgili dosyalara kaydet
-    for status_code, domains in status_code_files.items():
-        with open(f'{status_code}.txt', 'w') as status_file:
-            for domain in domains:
-                status_file.write(domain + '\n')
+            print(f"{url} = {status_color(status)}")
+        except requests.exceptions.RequestException:
+            print(f"{url} = {simple_colors.red('Kapalı')}")
 
 # Txt dosyasındaki domainleri okuyalım
 try:
